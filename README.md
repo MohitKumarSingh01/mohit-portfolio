@@ -46,3 +46,7 @@ Edit `server/index.js` to update the profile, skills, work history, projects and
 - `GET /api/projects`
 - `GET /api/certifications`
 - `POST /api/contact` with `{ "name": "...", "email": "...", "message": "..." }`
+
+
+## Vercel deployment note
+The React frontend now bundles profile, skills, experience, projects and certifications locally, so these sections render on static Vercel hosting without an Express API. The contact form requires a separately deployed API and email provider to actually deliver messages. Set `VITE_API_BASE_URL` to the deployed backend URL if/when one is configured.
