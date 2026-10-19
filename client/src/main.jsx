@@ -1,122 +1,178 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowDown, ArrowDownRight, ArrowRight, ArrowUpRight, BriefcaseBusiness, Check, ChevronDown, Code2, Download, ExternalLink, Github, GraduationCap, Layers3, Linkedin, Mail, MapPin, Menu, MessageCircle, Moon, Search, Send, Sparkles, Sun, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BriefcaseBusiness, ChevronDown, ChevronUp, Code2, Download, ExternalLink, Github, GraduationCap, Linkedin, Mail, MapPin, Menu, MessageCircle, Moon, Search, Send, Sun, X } from 'lucide-react';
 import './styles.css';
-import { profile as localProfile, experience as localExperience, skillGroups as localSkills, projects as localProjects, certifications as localCertifications, marketplaceExpertise, performanceMetrics, marketplacePlatforms } from './data.js';
+import { profile, experience as allExperience, skillGroups, projects, certifications, marketplaceExpertise, performanceMetrics, marketplacePlatforms } from './data.js';
 
-const fallbackProfile = {
-  name: 'Mohit Kumar Singh', headline: 'E-commerce & Quick Commerce Account Manager | Performance Marketing | CSE Graduate',
-  location: 'Bengaluru, Karnataka, India', email: 'mohitkumarsingh7050@gmail.com', phone: '+91 7050189007', cgpa: '7.56', twelfth: '75.4%',
-  summary: 'E-commerce and Quick Commerce Account Manager with hands-on experience managing brand accounts across marketplaces including Swiggy Instamart, Blinkit, Zepto, Amazon, Meesho and Flipkart. Experienced in marketplace operations, catalog management, inventory planning, PO coordination, advertising campaigns, pricing, discount optimization and sales analysis. Combines business execution with a Computer Science & Engineering foundation and a data-driven approach.',
-  links: { linkedin: 'https://www.linkedin.com/in/mohit-kumar-singh-1b6498270/', github: 'https://github.com/MohitKumarSingh01', email: 'mailto:mohitkumarsingh7050@gmail.com' }
-};
-const sections = ['About', 'Experience', 'Marketplace', 'Skills', 'Projects', 'Education', 'Certifications', 'Contact'];
-const categoryIcons = { 'Industry Knowledge': BriefcaseBusiness, 'Tools & Technologies': Code2, 'Interpersonal Skills': MessageCircle };
+const sections = ['About', 'Experience', 'Expertise', 'Skills', 'Projects', 'Education', 'Certifications', 'Contact'];
+const icons = { 'Industry Knowledge': BriefcaseBusiness, 'Tools & Technologies': Code2, 'Interpersonal Skills': MessageCircle };
+const featuredIds = ['growthbasket', 'readymade', 'brainhive', 'nexacart', 'chat-java', 'tictactoe'];
+const education = [
+  { title: 'Bachelor of Engineering — Computer Science & Engineering', short: 'B.E. Computer Science & Engineering', institution: 'Chandigarh University', period: '2022 – 2026', location: 'Mohali, Punjab', score: '7.56 CGPA', description: 'Undergraduate degree in Computer Science & Engineering. Focus areas include programming, data structures, databases, web technologies and analytical problem-solving.' },
+  { title: 'Intermediate / Class XII', short: 'Class XII (BSEB)', institution: 'Nagina Ray Uchch Madhyamik School', period: '2020 – 2022', location: 'Gopalganj, Bihar', score: '75.4%', description: 'Completed Intermediate education under BSEB.' }
+];
+
+function Heading({ kicker, title, accent, text }) {
+  return <div className="section-heading"><div><div className="kicker">{kicker}</div><h2>{title} <span className="grad">{accent}</span></h2></div>{text && <p>{text}</p>}</div>;
+}
 
 function App() {
-  const [profile, setProfile] = useState(localProfile || fallbackProfile);
-  const [experience, setExperience] = useState(localExperience);
-  const [skills, setSkills] = useState(localSkills);
-  const [projects, setProjects] = useState(localProjects);
-  const [certifications, setCertifications] = useState(localCertifications);
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [query, setQuery] = useState('');
+  const [dark, setDark] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const [view, setView] = useState('About');
   const [modal, setModal] = useState(null);
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [dark, setDark] = useState(true);
+  const [cat, setCat] = useState('All');
+  const [query, setQuery] = useState('');
+  const [more, setMore] = useState({ skills: false, projects: false, certs: false, metrics: false });
   const [form, setForm] = useState({ name: '', email: '', message: '' });
-  const [formState, setFormState] = useState({ busy: false, message: '', error: false });
+  const [status, setStatus] = useState({ busy: false, text: '', error: false });
+  const toggle = k => setMore(m => ({ ...m, [k]: !m[k] }));
+
+  const experience = allExperience.filter(e => e.period !== 'Details to confirm');
+  const allSkills = useMemo(() => Object.entries(skillGroups).flatMap(([category, items]) => items.map(([name, description]) => ({ name, description, category }))), []);
+  const filtered = allSkills.filter(s => (cat === 'All' || s.category === cat) && `${s.name} ${s.description}`.toLowerCase().includes(query.toLowerCase()));
+  const skills = more.skills || query || cat !== 'All' ? filtered : filtered.slice(0, 18);
+  const featured = featuredIds.map(id => projects.find(p => p.id === id)).filter(Boolean);
+  const shownProjects = more.projects ? projects : featured;
+  const marketCount = marketplacePlatforms.flatMap(g => g.platforms).length;
 
   useEffect(() => {
-    // Bundled data renders immediately on static hosting (e.g. Vercel).
-    // If a separately deployed API is configured later, it can enhance this data.
-    const apiBase = import.meta.env.VITE_API_BASE_URL || '';
-    if (!apiBase) return;
-    Promise.all([
-      fetch(`${apiBase}/api/profile`).then(r => r.ok ? r.json() : localProfile),
-      fetch(`${apiBase}/api/experience`).then(r => r.ok ? r.json() : localExperience),
-      fetch(`${apiBase}/api/skills`).then(r => r.ok ? r.json() : localSkills),
-      fetch(`${apiBase}/api/projects`).then(r => r.ok ? r.json() : localProjects),
-      fetch(`${apiBase}/api/certifications`).then(r => r.ok ? r.json() : localCertifications)
-    ]).then(([p, e, s, pr, c]) => { setProfile(p); setExperience(e); setSkills(s); setProjects(pr); setCertifications(c); }).catch(() => {});
+    const onKey = e => e.key === 'Escape' && setModal(null);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
+  useEffect(() => { document.body.style.overflow = modal ? 'hidden' : ''; }, [modal]);
 
-  const allSkills = useMemo(() => Object.entries(skills).flatMap(([category, items]) => items.map(([name, description]) => ({ name, description, category }))), [skills]);
-  const visibleSkills = useMemo(() => allSkills.filter(s => (activeCategory === 'All' || s.category === activeCategory) && `${s.name} ${s.description} ${s.category}`.toLowerCase().includes(query.toLowerCase())), [allSkills, activeCategory, query]);
-  const openModal = (type, item) => setModal({ type, item });
-  const scrollTo = (name) => { document.getElementById(name.toLowerCase())?.scrollIntoView({ behavior: 'smooth' }); setMobileMenu(false); };
+  const go = name => { setView(name); setMenu(false); window.scrollTo({ top: 0 }); };
+  const open = (type, item) => setModal({ type, item });
 
-  async function submitContact(e) {
-    e.preventDefault(); setFormState({ busy: true, message: '', error: false });
+  async function submit(e) {
+    e.preventDefault();
+    const api = import.meta.env.VITE_API_BASE_URL;
+    if (!api) {
+      const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);
+      window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent('Portfolio enquiry from ' + form.name)}&body=${body}`;
+      return;
+    }
+    setStatus({ busy: true, text: '', error: false });
     try {
-      const response = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Unable to submit form.');
-      setFormState({ busy: false, message: result.message, error: false }); setForm({ name: '', email: '', message: '' });
+      const r = await fetch(`${api}/api/contact`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || 'Unable to send message.');
+      setStatus({ busy: false, text: j.message || 'Message sent. Thank you!', error: false });
+      setForm({ name: '', email: '', message: '' });
     } catch (err) {
-      setFormState({ busy: false, message: `${err.message} You can email me directly instead.`, error: true });
+      setStatus({ busy: false, text: `${err.message} Please email me directly.`, error: true });
     }
   }
 
   return <div className={dark ? 'app dark' : 'app light'}>
-    <div className="ambient ambient-one"/><div className="ambient ambient-two"/>
-    <header className="topbar">
-      <button className="brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Back to top"><span className="brand-mark">M<span>.</span></span><span className="brand-name">MOHIT <b>KUMAR SINGH</b></span></button>
-      <nav className={mobileMenu ? 'nav open' : 'nav'}>{sections.map(s => <button key={s} onClick={() => scrollTo(s)}>{s}</button>)}</nav>
-      <div className="top-actions"><button className="icon-btn" onClick={() => setDark(!dark)} aria-label="Toggle theme">{dark ? <Sun size={17}/> : <Moon size={17}/>}</button><a className="nav-cta" href={profile.links.email}><Mail size={15}/> Let’s talk <ArrowUpRight size={14}/></a><button className="icon-btn menu-btn" onClick={() => setMobileMenu(!mobileMenu)} aria-label="Toggle menu">{mobileMenu ? <X/> : <Menu/>}</button></div>
-    </header>
+    <header className="topbar-wrap"><div className="topbar">
+      <button className="brand" onClick={() => go('About')}><span className="mark">M<i>.</i></span><span className="bname">Mohit Kumar Singh</span></button>
+      <nav className={menu ? 'nav open' : 'nav'}>{sections.map(s => <button key={s} className={view === s ? 'on' : ''} onClick={() => go(s)}>{s}</button>)}</nav>
+      <div className="actions">
+        <button className="icon-btn" onClick={() => setDark(!dark)} aria-label="Toggle theme">{dark ? <Sun size={16} /> : <Moon size={16} />}</button>
+        <a className="btn primary sm cta" href={profile.links.email}><Mail size={14} /> Contact</a>
+        <button className="icon-btn menu-btn" onClick={() => setMenu(!menu)} aria-label="Menu">{menu ? <X size={18} /> : <Menu size={18} />}</button>
+      </div>
+    </div></header>
 
-    <main>
-      <section className="hero section-wrap" id="about">
-        <div className="hero-copy"><div className="eyebrow"><span className="status-dot"/> OPEN TO THE RIGHT OPPORTUNITY <span className="eyebrow-line"/></div>
-          <h1>Building growth<br/>at the intersection of<br/><span className="gradient-text">business & technology.</span></h1>
-          <p className="hero-lede">I’m <strong>{profile.name}</strong> — an e-commerce and quick-commerce account management professional with a Computer Science background. I turn marketplace operations, performance marketing and data into practical business outcomes.</p>
-          <div className="hero-buttons"><button className="primary-btn" onClick={() => scrollTo('Experience')}>Explore my work <ArrowDownRight size={17}/></button><a className="secondary-btn" href="/Mohit-Kumar-Singh-Resume.pdf" download><Download size={16}/> Download resume</a></div>
-          <div className="hero-socials"><a href={profile.links.linkedin} target="_blank" rel="noreferrer"><Linkedin size={16}/> LinkedIn <ArrowUpRight size={12}/></a><a href={profile.links.github} target="_blank" rel="noreferrer"><Github size={16}/> GitHub <ArrowUpRight size={12}/></a><a href={profile.links.email}><Mail size={16}/> Email <ArrowUpRight size={12}/></a></div>
+    <main className="wrap">
+      <section className={view === 'About' ? 'hero' : 'hero off'} id="about">
+        <div>
+          <div className="eyebrow"><span className="dot" /> Open to opportunities</div>
+          <h1>E-commerce & Quick Commerce <span className="grad">Account Manager.</span></h1>
+          <p className="lede">{profile.summary}</p>
+          <div className="btns">
+            <a className="btn primary" href="/Mohit-Kumar-Singh-Resume.pdf" download><Download size={16} /> Download resume</a>
+            <button className="btn ghost" onClick={() => go('Experience')}>View experience <ArrowRight size={16} /></button>
+          </div>
+          <div className="socials"><a href={profile.links.linkedin} target="_blank" rel="noreferrer"><Linkedin size={16} /> LinkedIn</a><a href={profile.links.github} target="_blank" rel="noreferrer"><Github size={16} /> GitHub</a><a href={profile.links.email}><Mail size={16} /> Email</a></div>
         </div>
-        <div className="hero-visual"><div className="orbit orbit-a"/><div className="orbit orbit-b"/><div className="profile-card"><div className="profile-card-top"><span className="tiny-label">PROFILE / 2026</span><span className="live-pill"><span/> CURRENTLY WORKING</span></div><div className="avatar">M<span>K</span></div><h2>Mohit Kumar Singh</h2><p>Account Management · E-commerce · Performance Marketing</p><div className="profile-divider"/><div className="profile-meta"><span><MapPin size={14}/>{profile.location}</span><span><GraduationCap size={14}/>B.E. Computer Science & Engineering</span></div><div className="mini-stats"><div><strong>7.56</strong><small>CGPA</small></div><div><strong>75.4%</strong><small>Class XII</small></div><div><strong>6+</strong><small>Projects</small></div></div><div className="floating-chip chip-one"><Sparkles size={15}/> Data-driven growth</div><div className="floating-chip chip-two"><Layers3 size={15}/> Business + Tech</div></div></div>
-        <div className="hero-bottom-note"><span>01 / WHO I AM</span><span>SCROLL TO EXPLORE <ArrowDown size={14}/></span></div>
+        <aside className="card profile">
+          <div className="avatar">MK</div>
+          <h2>{profile.name}</h2>
+          <p>Account Management · Marketplace Operations · Performance Marketing</p>
+          <div className="meta"><span><MapPin size={14} />{profile.location}</span><span><GraduationCap size={14} />B.E. Computer Science & Engineering</span></div>
+          <div className="stats"><div><b>{marketCount}</b><small>Marketplaces</small></div><div><b>{profile.cgpa}</b><small>CGPA</small></div><div><b>{certifications.length}</b><small>Certifications</small></div></div>
+        </aside>
       </section>
 
-      <section className="section-wrap intro-strip"><div className="section-kicker">THE SHORT VERSION</div><div className="intro-grid"><h2>Not just what I do.<br/><span className="muted">How I think.</span></h2><p>{profile.summary}</p><button className="text-link" onClick={() => openModal('profile', profile)}>Read my full profile <ArrowUpRight size={15}/></button></div></section>
-
-      <section className="section-wrap section-block" id="experience"><div className="section-heading"><div><div className="section-kicker">CAREER TIMELINE / 02</div><h2>Experience that <span className="gradient-text">moves things forward.</span></h2></div><p>Roles, responsibilities and the skills I bring to each table.</p></div><div className="timeline">{experience.map((item, i) => <button className="timeline-card" key={item.id} onClick={() => openModal('experience', item)}><div className="timeline-marker">0{i + 1}</div><div className="timeline-main"><div className="timeline-top"><span className="company-name">{item.company}</span><span className="period">{item.period}</span></div><h3>{item.role}</h3><p className="timeline-location"><MapPin size={13}/>{item.location}</p><div className="tag-row">{item.skills.slice(0, 4).map(tag => <span className="tag" key={tag}>{tag}</span>)}</div></div><span className="card-arrow"><ArrowUpRight size={18}/></span></button>)}</div></section>
-
-      <section className="section-wrap section-block marketplace-section" id="marketplace">
-        <div className="section-heading"><div><div className="section-kicker">MARKETPLACE OPERATIONS / 03</div><h2>Full account ownership.<br/><span className="gradient-text">From listing to growth.</span></h2></div><p>Marketplace execution across e-commerce and quick commerce, combining catalog, inventory, advertising, commercial operations and performance reporting.</p></div>
-        <div className="platform-groups">{marketplacePlatforms.map(group => <article className="platform-card" key={group.name}><span className="section-kicker">PLATFORM COVERAGE</span><h3>{group.name}</h3><div className="platform-tags">{group.platforms.map(platform => <span className="platform-tag" key={platform}>{platform}</span>)}</div><p>{group.focus}</p></article>)}</div>
-        <div className="expertise-grid">{marketplaceExpertise.map((item, i) => <button className="expertise-card" key={item.id} onClick={() => openModal('expertise', item)}><div className="expertise-card-top"><span className="project-index">{String(i+1).padStart(2,'0')} / {item.group.toUpperCase()}</span><ArrowUpRight size={17}/></div><h3>{item.title}</h3><p>{item.description}</p><span className="expertise-more">View responsibilities <ArrowRight size={14}/></span></button>)}</div>
-        <div className="metrics-panel"><div className="metrics-heading"><div><div className="section-kicker">PERFORMANCE REPORTING</div><h3>Metrics I work with</h3></div><span className="metrics-note">Definitions vary by marketplace and attribution window.</span></div><div className="metrics-grid">{performanceMetrics.map(([name, description]) => <button className="metric-item" key={name} onClick={() => openModal('metric', {name, description})}><strong>{name}</strong><span>{description}</span><ArrowUpRight size={13}/></button>)}</div><p className="note-line">This is a capability and reporting framework, not a claim that every metric is available on every platform or that the values shown are personal results. Brand-level sales and confidential data are not published without approval.</p></div>
+      <section className={view === 'Experience' ? 'block' : 'block off'} id="experience">
+        <Heading kicker="Experience" title="Where I’ve" accent="worked." />
+        <div className="list">{experience.map(x => <button className="row" key={x.id} onClick={() => open('experience', x)}>
+          <div className="row-main"><h3>{x.role}</h3><p>{x.company} · {x.location}</p><div className="tags">{x.skills.slice(0, 4).map(t => <span className="tag" key={t}>{t}</span>)}</div></div>
+          <span className="period">{x.period}</span><ArrowUpRight size={16} className="chev" />
+        </button>)}</div>
       </section>
 
-      <section className="section-wrap section-block skills-section" id="skills"><div className="section-heading"><div><div className="section-kicker">TOOLKIT / 03</div><h2>Skills are more than <span className="gradient-text">keywords.</span></h2></div><p>Explore any skill to see what it means in my profile. Use search and category filters.</p></div><div className="skill-controls"><div className="category-tabs"><button className={activeCategory === 'All' ? 'active' : ''} onClick={() => setActiveCategory('All')}>All <span>{allSkills.length}</span></button>{Object.keys(skills).map(cat => <button key={cat} className={activeCategory === cat ? 'active' : ''} onClick={() => setActiveCategory(cat)}>{cat}<span>{skills[cat]?.length || 0}</span></button>)}</div><label className="search-box"><Search size={16}/><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search skills..."/><kbd>⌕</kbd></label></div><div className="skills-grid">{visibleSkills.map((skill, i) => { const Icon = categoryIcons[skill.category] || Code2; return <button key={`${skill.category}-${skill.name}`} className="skill-card" onClick={() => openModal('skill', skill)}><span className="skill-icon"><Icon size={17}/></span><span className="skill-card-copy"><strong>{skill.name}</strong><small>{skill.category}</small></span><ArrowUpRight className="skill-arrow" size={15}/></button>; })}</div>{visibleSkills.length === 0 && <div className="empty-state">No skills found. Try a different search.</div>}<div className="skills-footer"><span>Showing {visibleSkills.length} of {allSkills.length} skills</span><button className="text-link" onClick={() => {setActiveCategory('All');setQuery('');}}>Reset filters <ArrowRight size={14}/></button></div></section>
+      <section className={view === 'Expertise' ? 'block' : 'block off'} id="expertise">
+        <Heading kicker="Marketplace expertise" title="Listing to" accent="growth." text={`Account ownership across ${marketCount} e-commerce and quick-commerce platforms.`} />
+        <div className="grid2">{marketplacePlatforms.map(g => <article className="card" key={g.name}><h3>{g.name}</h3><div className="tags">{g.platforms.map(p => <span className="pill" key={p}>{p}</span>)}</div></article>)}</div>
+        <div className="grid3">{marketplaceExpertise.map(x => <button className="card tile" key={x.id} onClick={() => open('expertise', x)}><span className="kicker">{x.group}</span><h3>{x.title}</h3><p className="clamp">{x.description}</p></button>)}</div>
+        <button className="link" onClick={() => toggle('metrics')}>{more.metrics ? 'Hide' : 'Show'} metrics I work with ({performanceMetrics.length}) {more.metrics ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</button>
+        {more.metrics && <div className="tags metrics">{performanceMetrics.map(([n, d]) => <button className="pill" key={n} onClick={() => open('metric', { name: n, description: d })}>{n}</button>)}</div>}
+      </section>
 
-      <section className="section-wrap section-block" id="projects"><div className="section-heading"><div><div className="section-kicker">SELECTED WORK / 04</div><h2>Projects with a <span className="gradient-text">purpose.</span></h2></div><p>Academic and personal work across web development, AI and digital business.</p></div><div className="projects-grid">{projects.map((project, i) => <button className={`project-card project-${i % 3}`} key={project.id} onClick={() => openModal('project', project)}><div className="project-card-top"><span className="project-index">0{i + 1} / PROJECT</span><span className="project-open"><ArrowUpRight size={18}/></span></div><div className="project-art"><div className="art-grid"/><div className="art-symbol">{i === 0 ? <Layers3 size={45}/> : i === 1 ? <MessageCircle size={45}/> : i === 2 ? <Sparkles size={45}/> : i === 3 ? <Code2 size={45}/> : i === 4 ? <GraduationCap size={45}/> : <ArrowRight size={45}/>}</div><span className="art-number">{String(i + 1).padStart(2, '0')}</span></div><div className="project-copy"><div className="project-title-row"><h3>{project.name}</h3><span>{project.year}</span></div><p>{project.description}</p><div className="tag-row">{project.stack.slice(0, 3).map(tag => <span className="tag" key={tag}>{tag}</span>)}</div></div></button>)}</div><p className="note-line">Select any project to view its description, technology stack and repository link.</p></section>
+      <section className={view === 'Skills' ? 'block' : 'block off'} id="skills">
+        <Heading kicker="Skills" title="Toolkit &" accent="strengths." />
+        <div className="controls">
+          <div className="tabs">{['All', ...Object.keys(skillGroups)].map(c => <button key={c} className={cat === c ? 'active' : ''} onClick={() => setCat(c)}>{c}</button>)}</div>
+          <label className="search"><Search size={15} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search skills" /></label>
+        </div>
+        <div className="tags">{skills.map(s => { const I = icons[s.category] || Code2; return <button className="chip" key={s.category + s.name} onClick={() => open('skill', s)}><I size={14} />{s.name}</button>; })}</div>
+        {skills.length === 0 && <p className="muted">No skills found.</p>}
+        {!query && cat === 'All' && <button className="link" onClick={() => toggle('skills')}>{more.skills ? 'Show fewer' : `Show all ${allSkills.length} skills`} {more.skills ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</button>}
+      </section>
 
-      <section className="section-wrap section-block education-section" id="education"><div className="section-heading"><div><div className="section-kicker">EDUCATION / 05</div><h2>My foundation in <span className="gradient-text">technology.</span></h2></div><p>Academic background and the milestones that shaped my approach.</p></div><div className="education-grid"><button className="education-card" onClick={() => openModal('education', {title:'Bachelor of Engineering — Computer Science & Engineering', institution:'Chandigarh University', period:'2022 – 2026', location:'Mohali, Punjab', score:'7.56 CGPA', description:'Undergraduate degree in Computer Science & Engineering. Focus areas include programming, data structures, databases, web technologies and analytical problem-solving.'})}><div className="edu-icon"><GraduationCap size={23}/></div><div className="edu-content"><span className="section-kicker">2022 — 2026</span><h3>Bachelor of Engineering</h3><p>Computer Science & Engineering</p><span className="edu-institution">Chandigarh University · Mohali, Punjab</span></div><div className="score-badge"><strong>7.56</strong><small>CGPA</small></div><ArrowUpRight className="edu-arrow" size={18}/></button><button className="education-card" onClick={() => openModal('education', {title:'Intermediate / Class XII', institution:'Nagina Ray Uchch Madhyamik School', period:'2020 – 2022', location:'Gopalganj, Bihar', score:'75.4%', description:'Completed Intermediate education under BSEB.'})}><div className="edu-icon"><GraduationCap size={23}/></div><div className="edu-content"><span className="section-kicker">2020 — 2022</span><h3>Intermediate / Class XII</h3><p>Science / Intermediate</p><span className="edu-institution">Nagina Ray Uchch Madhyamik School · Gopalganj, Bihar</span></div><div className="score-badge"><strong>75.4%</strong><small>SCORE</small></div><ArrowUpRight className="edu-arrow" size={18}/></button></div></section>
+      <section className={view === 'Projects' ? 'block' : 'block off'} id="projects">
+        <Heading kicker="Projects" title="Selected" accent="work." text="Web, AI and business projects. Open any card for details and links." />
+        <div className="grid3">{shownProjects.map(p => <button className="card tile" key={p.id} onClick={() => open('project', p)}>
+          <div className="tile-top"><span className="kicker">{p.year}</span><ArrowUpRight size={16} /></div><h3>{p.name}</h3><p className="clamp">{p.description}</p>
+          <div className="tags">{p.stack.slice(0, 3).map(t => <span className="tag" key={t}>{t}</span>)}</div></button>)}</div>
+        <button className="link" onClick={() => toggle('projects')}>{more.projects ? 'Show featured only' : `View all ${projects.length} projects`} {more.projects ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</button>
+      </section>
 
-      <section className="section-wrap section-block" id="certifications"><div className="section-heading"><div><div className="section-kicker">CONTINUOUS LEARNING / 06</div><h2>Certifications & <span className="gradient-text">learning.</span></h2></div><p>Click any credential to view its summary. Verification links can be added when available.</p></div><div className="cert-grid">{certifications.map((cert, i) => <button className="cert-card" key={cert.id} onClick={() => openModal('certification', cert)}><span className="cert-number">{String(i + 1).padStart(2, '0')}</span><div><h3>{cert.name}</h3><p>{cert.issuer}</p></div><ArrowUpRight size={16}/></button>)}</div></section>
+      <section className={view === 'Education' ? 'block' : 'block off'} id="education">
+        <Heading kicker="Education" title="Academic" accent="background." />
+        <div className="list">{education.map(e => <button className="row" key={e.title} onClick={() => open('education', e)}>
+          <div className="row-main"><h3>{e.title}</h3><p>{e.institution} · {e.period} · {e.location}</p></div><b className="score">{e.score}</b></button>)}</div>
+      </section>
 
-      <section className="section-wrap contact-section" id="contact"><div className="contact-copy"><div className="section-kicker">YOUR TURN / 07</div><h2>Have a challenge?<br/><span className="gradient-text">Let’s talk.</span></h2><p>Open to conversations around e-commerce, quick commerce, performance marketing, business operations and technology-led growth.</p><div className="contact-links"><a href={profile.links.email}><Mail size={17}/><span><small>EMAIL ME</small>{profile.email}</span><ArrowUpRight size={16}/></a><a href={profile.links.linkedin} target="_blank" rel="noreferrer"><Linkedin size={17}/><span><small>CONNECT ON LINKEDIN</small>Professional profile</span><ArrowUpRight size={16}/></a><a href={profile.links.github} target="_blank" rel="noreferrer"><Github size={17}/><span><small>EXPLORE CODE</small>GitHub profile</span><ArrowUpRight size={16}/></a></div></div><form className="contact-form" onSubmit={submitContact}><div className="form-heading"><span>CONTACT FORM</span><span className="form-dot"/></div><label>Your name<input required value={form.name} onChange={e => setForm({...form, name:e.target.value})} placeholder="Name"/></label><label>Email address<input required type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})} placeholder="you@example.com"/></label><label>What would you like to discuss?<textarea required rows="4" value={form.message} onChange={e => setForm({...form, message:e.target.value})} placeholder="Tell me a little about it..."/></label><button className="primary-btn submit-btn" disabled={formState.busy}>{formState.busy ? 'Sending...' : 'Send message'} <Send size={15}/></button>{formState.message && <p className={formState.error ? 'form-message error' : 'form-message'}>{formState.message}</p>}<small className="form-note">Demo form uses the included API and logs submissions to the server console. Configure email delivery before publishing.</small></form></section>
+      <section className={view === 'Certifications' ? 'block' : 'block off'} id="certifications">
+        <Heading kicker="Certifications" title="Learning &" accent="credentials." />
+        <div className="grid2">{certifications.map(c => <button className="row compact" key={c.id} onClick={() => open('certification', c)}><div className="row-main"><h3>{c.name}</h3><p>{c.issuer}</p></div><ArrowUpRight size={15} className="chev" /></button>)}</div>
+      </section>
+
+      <section className={view === 'Contact' ? 'block contact card' : 'block contact card off'} id="contact">
+        <div><div className="kicker">Contact</div><h2>Let’s <span className="grad">talk.</span></h2><p className="muted">Open to roles and conversations around e-commerce, quick commerce, performance marketing and technology-led growth.</p>
+          <div className="socials col"><a href={profile.links.email}><Mail size={16} /> {profile.email}</a><a href={profile.links.linkedin} target="_blank" rel="noreferrer"><Linkedin size={16} /> LinkedIn</a><a href={profile.links.github} target="_blank" rel="noreferrer"><Github size={16} /> GitHub</a></div></div>
+        <form onSubmit={submit}>
+          <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your name" />
+          <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="Email address" />
+          <textarea required rows="4" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="How can I help?" />
+          <button className="btn primary" disabled={status.busy}>{status.busy ? 'Sending…' : 'Send message'} <Send size={15} /></button>
+          {status.text && <p className={status.error ? 'msg error' : 'msg'}>{status.text}</p>}
+        </form>
+      </section>
     </main>
 
-    <footer className="footer section-wrap"><button className="brand" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}><span className="brand-mark">M<span>.</span></span><span className="brand-name">MOHIT <b>KUMAR SINGH</b></span></button><span>Designed to tell the story behind the résumé.</span><button className="back-top" onClick={() => window.scrollTo({top:0,behavior:'smooth'})}>BACK TO TOP <ArrowUpRight size={14}/></button></footer>
+    <footer className="wrap footer"><span>© {new Date().getFullYear()} {profile.name}</span><button className="link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Back to top <ArrowUpRight size={14} /></button></footer>
 
-    {modal && <div className="modal-backdrop" role="presentation" onMouseDown={e => {if(e.target === e.currentTarget) setModal(null);}}><section className="detail-modal" role="dialog" aria-modal="true" aria-label="Portfolio details"><div className="modal-top"><span className="section-kicker">{modal.type.toUpperCase()} / DETAILS</span><button className="icon-btn" onClick={() => setModal(null)} aria-label="Close details"><X size={19}/></button></div><ModalContent modal={modal}/><div className="modal-footer"><span><Check size={14}/> PORTFOLIO DETAIL</span><button className="text-link" onClick={() => setModal(null)}>Close panel <X size={14}/></button></div></section></div>}
+    {modal && <div className="backdrop" onMouseDown={e => e.target === e.currentTarget && setModal(null)}><section className="modal" role="dialog" aria-modal="true"><button className="icon-btn close" onClick={() => setModal(null)} aria-label="Close"><X size={18} /></button><ModalContent {...modal} /></section></div>}
   </div>;
 }
 
-function ModalContent({ modal }) {
-  const { type, item } = modal;
-  if (type === 'skill') return <><h2>{item.name}</h2><span className="modal-category">{item.category}</span><p className="modal-description">{item.description}</p><div className="modal-info-box"><strong>How it fits my profile</strong><p>{item.category === 'Industry Knowledge' ? 'Relevant to my current e-commerce, quick-commerce and business operations work, or learning areas included in my profile.' : item.category === 'Tools & Technologies' ? 'Part of my technical toolkit, academic foundation or project experience. Depth varies by tool and should be discussed in context.' : 'Supports collaboration, communication, problem-solving and professional development.'}</p></div></>;
-  if (type === 'experience') return <><h2>{item.role}</h2><div className="modal-subtitle">{item.company} · {item.period}</div><p className="modal-location"><MapPin size={14}/>{item.location}</p><ul className="detail-list">{item.details.map((d,i)=><li key={i}>{d}</li>)}</ul><h4>Skills connected to this role</h4><div className="tag-row">{item.skills.map(s=><span className="tag" key={s}>{s}</span>)}</div></>;
-  if (type === 'project') return <><h2>{item.name}</h2><div className="modal-subtitle">{item.year} · Selected project</div><p className="modal-description">{item.description}</p><h4>Technology stack</h4><div className="tag-row">{item.stack.map(s=><span className="tag" key={s}>{s}</span>)}</div><h4>Project links</h4><div className="modal-link-list">{item.links.map(l=><a key={l.label} href={l.url} target="_blank" rel="noreferrer">{l.label}<ExternalLink size={14}/></a>)}</div><p className="modal-footnote">For projects without a direct repository URL, the GitHub profile link is provided. Replace it with the specific repository when available.</p></>;
-  if (type === 'expertise') return <><h2>{item.title}</h2><div className="modal-subtitle">{item.group} · Marketplace account management</div><p className="modal-description">{item.description}</p><h4>Scope of responsibilities</h4><ul className="detail-list">{item.tasks.map((task, i) => <li key={i}>{task}</li>)}</ul><div className="modal-info-box"><strong>Working approach</strong><p>Prioritize by business impact, urgency, inventory and campaign context; maintain clear trackers; coordinate with platform and internal stakeholders; and review results against agreed targets.</p></div></>;
-  if (type === 'metric') return <><h2>{item.name}</h2><p className="modal-description">{item.description}</p><div className="modal-info-box"><strong>Reporting note</strong><p>Compare like-for-like dates, marketplace attribution windows, campaign types and cost definitions. ROAS is ad-sales efficiency; total ROI may require margin and other business costs to calculate meaningfully.</p></div></>;
-  if (type === 'certification') return <><h2>{item.name}</h2><div className="modal-subtitle">{item.issuer}</div><p className="modal-description">{item.description}</p><div className="modal-info-box"><strong>Credential verification</strong><p>No direct verification URL was supplied for this item. Add a credential link in the API data when available.</p></div></>;
-  if (type === 'education') return <><h2>{item.title}</h2><div className="modal-subtitle">{item.institution} · {item.period}</div><p className="modal-location"><MapPin size={14}/>{item.location}</p><div className="education-score-large">{item.score}</div><p className="modal-description">{item.description}</p></>;
-  if (type === 'profile') return <><h2>About Mohit</h2><p className="modal-description">{item.summary}</p><div className="modal-info-box"><strong>Professional identity</strong><p>Current focus: e-commerce and quick-commerce account management, marketplace operations and performance marketing. Foundation: Computer Science & Engineering, web technologies, databases and problem solving.</p></div><div className="modal-link-list"><a href={item.links.linkedin} target="_blank" rel="noreferrer">LinkedIn profile <ExternalLink size={14}/></a><a href={item.links.github} target="_blank" rel="noreferrer">GitHub profile <ExternalLink size={14}/></a><a href={item.links.email}>Email Mohit <ArrowUpRight size={14}/></a></div></>;
+function ModalContent({ type, item }) {
+  const Tags = ({ list }) => <div className="tags">{list.map(t => <span className="tag" key={t}>{t}</span>)}</div>;
+  if (type === 'skill') return <><h2>{item.name}</h2><span className="kicker">{item.category}</span><p className="muted">{item.description}</p></>;
+  if (type === 'metric') return <><h2>{item.name}</h2><p className="muted">{item.description}</p></>;
+  if (type === 'experience') return <><h2>{item.role}</h2><p className="sub">{item.company} · {item.period}</p><ul>{item.details.map((d, i) => <li key={i}>{d}</li>)}</ul><Tags list={item.skills} /></>;
+  if (type === 'expertise') return <><h2>{item.title}</h2><p className="sub">{item.group}</p><p className="muted">{item.description}</p><ul>{item.tasks.map((t, i) => <li key={i}>{t}</li>)}</ul></>;
+  if (type === 'project') return <><h2>{item.name}</h2><p className="sub">{item.year}</p><p className="muted">{item.description}</p><Tags list={item.stack} /><div className="links">{item.links.map(l => <a key={l.label} href={l.url} target="_blank" rel="noreferrer">{l.label} <ExternalLink size={14} /></a>)}</div></>;
+  if (type === 'certification') return <><h2>{item.name}</h2><p className="sub">{item.issuer}</p><p className="muted">{item.description}</p></>;
+  if (type === 'education') return <><h2>{item.title}</h2><p className="sub">{item.institution} · {item.period}</p><p className="muted"><MapPin size={13} /> {item.location}</p><b className="score big">{item.score}</b><p className="muted">{item.description}</p></>;
   return null;
 }
 
-createRoot(document.getElementById('root')).render(<React.StrictMode><App/></React.StrictMode>);
+createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);
