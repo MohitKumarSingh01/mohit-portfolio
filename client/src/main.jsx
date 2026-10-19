@@ -120,6 +120,14 @@ function App() {
         </aside>
       </section>
 
+      <section className={view === 'About' ? 'explore' : 'explore off'}>
+        <div className="kicker">Explore my portfolio</div>
+        <div className="explore-grid">
+          {[['Experience', 'Roles and responsibilities'], ['Expertise', 'Marketplace account management'], ['Skills', 'E-commerce, technical and professional'], ['Projects', 'Web, AI and business work'], ['Education', 'Academic background'], ['Certifications', `${certifications.length} credentials with links`], ['Contact', 'Email, phone and message form']].map(([n, d]) => <button className="card tile" key={n} onClick={() => go(n)}><div className="tile-top"><h3>{n}</h3><ArrowUpRight size={16} /></div><p>{d}</p></button>)}
+          <a className="card tile" href="/Mohit-Kumar-Singh-Resume.pdf" download><div className="tile-top"><h3>Resume</h3><Download size={16} /></div><p>Download PDF</p></a>
+        </div>
+      </section>
+
       <section className={view === 'Experience' ? 'block' : 'block off'} id="experience">
         <Heading kicker="Experience" title="Where I’ve" accent="worked." />
         <div className="list">{experience.map(x => <button className="row" key={x.id} onClick={() => open('experience', x)}>

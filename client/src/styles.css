@@ -52,3 +52,7 @@ h1,h2,h3{font-family:Manrope,sans-serif;letter-spacing:-.02em;margin:0;line-heig
 
 .off{display:none!important}.nav .on{color:var(--accent);font-weight:600}.block{padding-top:48px}main{min-height:70vh}
 .skill-groups{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px;align-items:start}.skill-group h3{font-size:15px;margin-bottom:12px}@media(max-width:760px){.skill-groups{grid-template-columns:1fr}}
+
+.explore{padding-top:36px}.explore-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}.explore-grid .tile{gap:6px;padding:16px}.explore-grid .tile h3{font-size:15px}.explore-grid .tile p{font-size:12.5px}
+@media(max-width:900px){.explore-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.topbar{height:auto;flex-wrap:wrap;gap:0 12px;padding-top:10px}.topbar .brand{order:1}.topbar .actions{order:2;margin-left:auto}.menu-btn{display:none}.topbar .nav{order:3;display:flex;position:static;width:100%;flex-direction:row;gap:20px;padding:0;background:none;border:0;overflow-x:auto;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}.topbar .nav button{white-space:nowrap;padding:12px 0;flex-shrink:0;border-bottom:2px solid transparent}.nav .on{border-bottom-color:var(--accent)}}
