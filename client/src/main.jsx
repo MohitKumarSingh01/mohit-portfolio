@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ArrowRight, ArrowUpRight, BriefcaseBusiness, ChevronDown, ChevronUp, Code2, Download, ExternalLink, Github, GraduationCap, Linkedin, Mail, MapPin, Menu, MessageCircle, Moon, Search, Send, Sun, X } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BriefcaseBusiness, ChevronDown, ChevronUp, Code2, Download, ExternalLink, Github, GraduationCap, Linkedin, Mail, MapPin, Menu, Phone, MessageCircle, Moon, Search, Send, Sun, X } from 'lucide-react';
 import './styles.css';
 import { profile, experience as allExperience, skillGroups, projects, certifications, marketplaceExpertise, performanceMetrics, marketplacePlatforms } from './data.js';
 
@@ -16,11 +16,13 @@ const education = [
 const ecomDesc = 'Account health, listings and catalog, rich content, pricing, promotions, inventory, advertising and sales analysis.';
 const qcDesc = 'SKU onboarding and catalog, stock availability, PO / RO coordination, warehouse and dark-store inwarding, campaign execution, pricing and sales / ads reporting.';
 const platformDesc = { 'Amazon Account Management': ecomDesc, 'Flipkart Account Management': ecomDesc, 'Myntra Account Management': ecomDesc, 'Meesho Account Management': ecomDesc, 'Blinkit Account Management': qcDesc, 'Swiggy Instamart Account Management': qcDesc, 'Zepto Account Management': qcDesc };
+['Amazon', 'Flipkart', 'Myntra', 'Meesho', 'Blinkit', 'Swiggy Instamart', 'Zepto'].forEach(p => { platformDesc[`${p} Ads`] = `Campaign setup support, monitoring, optimisation and reporting on ${p} advertising products. Campaign types vary by platform and account access.`; });
 const skillCats = [
   { title: 'E-commerce & Quick Commerce', groups: [
     { label: 'E-commerce marketplaces', items: ['Amazon Account Management', 'Flipkart Account Management', 'Myntra Account Management', 'Meesho Account Management'] },
     { label: 'Quick-commerce platforms', items: ['Blinkit Account Management', 'Swiggy Instamart Account Management', 'Zepto Account Management'] },
-    { label: 'Advertising & growth', items: ['Amazon Ads Management', 'Amazon Ads', 'Pricing & Discount Strategy', 'Sales Strategy', 'Business Marketing', 'Marketing Support'] },
+    { label: 'Performance advertising', items: ['Amazon Ads', 'Flipkart Ads', 'Myntra Ads', 'Meesho Ads', 'Blinkit Ads', 'Swiggy Instamart Ads', 'Zepto Ads'] },
+    { label: 'Growth & strategy', items: ['Pricing & Discount Strategy', 'Sales Strategy', 'Business Marketing', 'Marketing Support'] },
     { label: 'Operations & analytics', items: ['Product Listing & Catalog Management', 'Inventory Planning', 'Sales Analysis', 'Business Analytics', 'Account Management', 'Customer Relationship Management (CRM)'] } ] },
   { title: 'Technical Competencies', groups: [
     { label: 'Programming', items: ['C', 'C++', 'Java', 'Python', 'DSA', 'OOP'] },
@@ -68,21 +70,21 @@ function App() {
 
   async function submit(e) {
     e.preventDefault();
-    const api = import.meta.env.VITE_API_BASE_URL;
-    if (!api) {
+    const key = import.meta.env.VITE_WEB3FORMS_KEY;
+    if (!key) {
       const body = encodeURIComponent(`${form.message}\n\n— ${form.name} (${form.email})`);
       window.location.href = `mailto:${profile.email}?subject=${encodeURIComponent('Portfolio enquiry from ' + form.name)}&body=${body}`;
       return;
     }
     setStatus({ busy: true, text: '', error: false });
     try {
-      const r = await fetch(`${api}/api/contact`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      const r = await fetch('https://api.web3forms.com/submit', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ access_key: key, subject: `Portfolio enquiry from ${form.name}`, from_name: 'Portfolio website', name: form.name, email: form.email, message: form.message }) });
       const j = await r.json();
-      if (!r.ok) throw new Error(j.error || 'Unable to send message.');
-      setStatus({ busy: false, text: j.message || 'Message sent. Thank you!', error: false });
+      if (!j.success) throw new Error(j.message || 'Unable to send message.');
+      setStatus({ busy: false, text: 'Thank you! Your message has been sent. I will get back to you soon.', error: false });
       setForm({ name: '', email: '', message: '' });
     } catch (err) {
-      setStatus({ busy: false, text: `${err.message} Please email me directly.`, error: true });
+      setStatus({ busy: false, text: `${err.message} Please email me directly at ${profile.email}.`, error: true });
     }
   }
 
@@ -161,7 +163,7 @@ function App() {
 
       <section className={view === 'Contact' ? 'block contact card' : 'block contact card off'} id="contact">
         <div><div className="kicker">Contact</div><h2>Let’s <span className="grad">talk.</span></h2><p className="muted">Open to roles and conversations around e-commerce, quick commerce, performance marketing and technology-led growth.</p>
-          <div className="socials col"><a href={profile.links.email}><Mail size={16} /> {profile.email}</a><a href={profile.links.linkedin} target="_blank" rel="noreferrer"><Linkedin size={16} /> LinkedIn</a><a href={profile.links.github} target="_blank" rel="noreferrer"><Github size={16} /> GitHub</a></div></div>
+          <div className="socials col"><a href={profile.links.email}><Mail size={16} /> {profile.email}</a><a href="tel:+917050189007"><Phone size={16} /> {profile.phone}</a><a href={profile.links.linkedin} target="_blank" rel="noreferrer"><Linkedin size={16} /> LinkedIn</a><a href={profile.links.github} target="_blank" rel="noreferrer"><Github size={16} /> GitHub</a></div></div>
         <form onSubmit={submit}>
           <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Your name" />
           <input required type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="Email address" />

@@ -109,11 +109,13 @@ export const performanceMetrics = [
   ['Ad Clicks', 'Number of clicks received by ads.'],
   ['CTR', 'Click-through rate = clicks ÷ impressions × 100.'],
   ['CPC', 'Cost per click = ad spend ÷ clicks.'],
+  ['CPM', 'Cost per thousand impressions = ad spend ÷ impressions × 1,000.'],
   ['Ad Orders', 'Orders attributed to advertising under the platform’s attribution rules.'],
   ['Ad Order Value / Ad Sales', 'Sales value attributed to advertising.'],
   ['CVR', 'Conversion rate; use the platform’s defined denominator (often orders ÷ clicks × 100).'],
   ['ROAS (Ads)', 'Ad sales ÷ ad spend. This is revenue efficiency, not net profit.'],
   ['ACOS', 'Ad spend ÷ ad sales × 100.'],
+  ['TACoS', 'Total advertising cost of sales = ad spend ÷ total sales (paid + organic) × 100.'],
   ['Average Order Value (Ads)', 'Ad-attributed sales ÷ ad-attributed orders.'],
   ['CPS (Ads)', 'Cost per sale/order, according to the agreed reporting definition.'],
   ['Organic Orders', 'Orders not attributed to advertising by the platform.'],
@@ -127,7 +129,12 @@ export const performanceMetrics = [
   ['Units Sold', 'Total units sold; useful alongside order count and average units per order.'],
   ['New-to-Brand', 'New-to-brand customer or order measures where the platform provides them.'],
   ['Budget Utilization', 'Spend versus approved budget or RO/advertising allocation.'],
-  ['Stock Availability', 'Availability, in-stock rate and out-of-stock duration by SKU/location where data is available.']
+  ['Stock Availability', 'Availability, in-stock rate and out-of-stock duration by SKU/location where data is available.'],
+  ['Page Views / Glance Views', 'Product detail page views; read together with conversion to judge traffic quality.'],
+  ['Add-to-Cart Rate', 'Share of product views that lead to an add-to-cart action, where the platform reports it.'],
+  ['GMV', 'Gross merchandise value: total value of orders placed, before returns and cancellations.'],
+  ['Return / RTO Rate', 'Share of units or orders returned or undelivered, by SKU and reason where available.'],
+  ['Fill Rate', 'PO quantity delivered and accepted ÷ PO quantity requested × 100.']
 ];
 
 export const marketplacePlatforms = [
