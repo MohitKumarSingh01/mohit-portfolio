@@ -136,7 +136,7 @@ export const marketplacePlatforms = [
 ];
 
 export const projects = [
-  { id:'readymade', name:'Singh Readymade Vastralaya', year:'2026', stack:['TypeScript','Full-stack E-commerce'], description:'Full-stack dynamic e-commerce website for Singh Readymade Vastralaya.', links:[{label:'GitHub repository',url:'https://github.com/MohitKumarSingh01/singh-readymade-vastralaya'}] },
+  { id:'readymade', name:'Singh Readymade Vastralaya', year:'2026', stack:['TypeScript','Full-stack E-commerce'], description:'Full-stack dynamic e-commerce website for Singh Readymade Vastralaya.', links:[{label:'Live website',url:'https://singh-readymade-vastralaya-h8wl2ffmz.vercel.app/'},{label:'GitHub repository',url:'https://github.com/MohitKumarSingh01/singh-readymade-vastralaya'}] },
   { id:'growthbasket', name:'The Growth Basket', year:'2026', stack:['HTML','Marketing Website','Vercel'], description:'Marketing agency website for full account-management services.', links:[{label:'Live website',url:'https://the-growth-basket.vercel.app/'},{label:'GitHub repository',url:'https://github.com/MohitKumarSingh01/the-growth-basket'}] },
   { id:'brainhive', name:'BrainHive', year:'2025', stack:['TypeScript','Next.js','React'], description:'Collaborative social media platform for researchers and innovators.', links:[{label:'GitHub repository',url:'https://github.com/MohitKumarSingh01/BrainHive'}] },
   { id:'brainhive1', name:'Brainhive1', year:'2025', stack:['Repository'], description:'Additional Brainhive repository shared on GitHub.', links:[{label:'GitHub repository',url:'https://github.com/MohitKumarSingh01/Brainhive1'}] },
@@ -166,17 +166,18 @@ export const projects = [
 ];
 
 export const certifications = [
-  ['Amazon Ads Foundations Certification', 'Amazon Ads Academy', 'Campaign planning, ad formats, audience targeting and measurement.'],
-  ['Sales & Marketing – Business Essentials Program', 'HighRadius · May 2025', 'Sales strategy, marketing fundamentals and client engagement.'],
-  ['Cybersecurity Attack and Defense Fundamentals', 'EC-Council via Coursera · Nov 2024', 'Cybersecurity fundamentals.'],
-  ['Internet of Things: Design Concepts and Use Cases', 'NPTEL/SWAYAM · 77%', 'IoT design concepts and use cases.'],
-  ['Cloud Computing', 'NPTEL / IIT Kharagpur · 76%', 'Cloud computing fundamentals.'],
-  ['Introduction to Databases', 'Meta via Coursera', 'Database fundamentals.'],
-  ['TCS iON Career Edge – Young Professional', 'Tata Consultancy Services', 'Professional communication, workplace and career skills.'],
-  ['Blockchain A-Z: A Deep Dive into Building Decentralized Applications', 'Chandigarh University · 96%', 'Blockchain and decentralized application concepts.'],
-  ['Advanced Blockchain Development', 'Infosys Springboard / Chandigarh University · 92%', 'Advanced blockchain development concepts.'],
-  ['Python 101 for Data Science', 'IBM Developer Skills Network / Cognitive Class', 'Python foundations for data science.'],
-  ['Java Full Stack Developer Specialization', 'Board Infinity / Coursera · June 2025', 'Java, frontend fundamentals and full-stack concepts.'],
+  ['Amazon Ads Foundations Certification', 'Amazon Ads Academy', 'Campaign planning, ad formats, audience targeting and measurement.', 'https://lnkd.in/p/dMg7rGGR'],
+  ['Sales & Marketing – Business Essentials Program', 'HighRadius · May 2025', 'Sales strategy, marketing fundamentals and client engagement.', 'https://lnkd.in/p/dTh2FdDi'],
+  ['Cybersecurity Attack and Defense Fundamentals', 'EC-Council via Coursera · Nov 2024', 'Cybersecurity fundamentals.', 'https://lnkd.in/p/dJa2FNsS'],
+  ['Internet of Things: Design Concepts and Use Cases', 'NPTEL/SWAYAM · 77%', 'IoT design concepts and use cases.', 'https://lnkd.in/p/dRNNJE3H'],
+  ['Cloud Computing', 'NPTEL / IIT Kharagpur · 76%', 'Cloud computing fundamentals.', 'https://lnkd.in/p/dp8em7xT'],
+  ['Introduction to Databases', 'Meta via Coursera', 'Database fundamentals.', 'https://lnkd.in/p/d3z_FEpd'],
+  ['TCS iON Career Edge – Young Professional', 'Tata Consultancy Services', 'Professional communication, workplace and career skills.', 'https://lnkd.in/p/d7w5SM98'],
+  ['Blockchain A-Z: A Deep Dive into Building Decentralized Applications', 'Chandigarh University · 96%', 'Blockchain and decentralized application concepts.', 'https://lnkd.in/p/dMgKciTP'],
+  ['Advanced Blockchain Development', 'Infosys Springboard / Chandigarh University · 92%', 'Advanced blockchain development concepts.', 'https://lnkd.in/p/dMgKciTP'],
+  ['Blockchain Technology using Ethereum and Polygon', 'Chandigarh University in collaboration with Metacrafters', 'Blockchain application development on Ethereum and Polygon.', 'https://lnkd.in/p/dPXiMRsC'],
+  ['Python 101 for Data Science', 'IBM Developer Skills Network / Cognitive Class', 'Python foundations for data science.', 'https://lnkd.in/p/dsfijuiJ'],
+  ['Java Full Stack Developer Specialization', 'Board Infinity / Coursera · June 2025', 'Java, frontend fundamentals and full-stack concepts.', 'https://lnkd.in/p/dmqcBp5j'],
   ['Technical Writing: Quick Start Guides', 'LinkedIn Learning', 'Technical writing and documentation.'],
   ['Business Analytics Foundations', 'LinkedIn Learning', 'Descriptive, exploratory and explanatory analytics.']
-].map((c, i) => ({ id: `cert-${i}`, name: c[0], issuer: c[1], description: c[2] }));
+].map((c, i) => ({ id: `cert-${i}`, name: c[0], issuer: c[1], description: c[2], url: c[3] }));

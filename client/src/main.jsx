@@ -12,6 +12,28 @@ const education = [
   { title: 'Intermediate / Class XII', short: 'Class XII (BSEB)', institution: 'Nagina Ray Uchch Madhyamik School', period: '2020 – 2022', location: 'Gopalganj, Bihar', score: '75.4%', description: 'Completed Intermediate education under BSEB.' }
 ];
 
+
+const ecomDesc = 'Account health, listings and catalog, rich content, pricing, promotions, inventory, advertising and sales analysis.';
+const qcDesc = 'SKU onboarding and catalog, stock availability, PO / RO coordination, warehouse and dark-store inwarding, campaign execution, pricing and sales / ads reporting.';
+const platformDesc = { 'Amazon Account Management': ecomDesc, 'Flipkart Account Management': ecomDesc, 'Myntra Account Management': ecomDesc, 'Meesho Account Management': ecomDesc, 'Blinkit Account Management': qcDesc, 'Swiggy Instamart Account Management': qcDesc, 'Zepto Account Management': qcDesc };
+const skillCats = [
+  { title: 'E-commerce & Quick Commerce', groups: [
+    { label: 'E-commerce marketplaces', items: ['Amazon Account Management', 'Flipkart Account Management', 'Myntra Account Management', 'Meesho Account Management'] },
+    { label: 'Quick-commerce platforms', items: ['Blinkit Account Management', 'Swiggy Instamart Account Management', 'Zepto Account Management'] },
+    { label: 'Advertising & growth', items: ['Amazon Ads Management', 'Amazon Ads', 'Pricing & Discount Strategy', 'Sales Strategy', 'Business Marketing', 'Marketing Support'] },
+    { label: 'Operations & analytics', items: ['Product Listing & Catalog Management', 'Inventory Planning', 'Sales Analysis', 'Business Analytics', 'Account Management', 'Customer Relationship Management (CRM)'] } ] },
+  { title: 'Technical Competencies', groups: [
+    { label: 'Programming', items: ['C', 'C++', 'Java', 'Python', 'DSA', 'OOP'] },
+    { label: 'Web development', items: ['HTML', 'CSS', 'JavaScript', 'React.js', 'Next.js', 'Node.js', 'Express.js', 'REST APIs', 'JSON'] },
+    { label: 'Databases', items: ['SQL', 'MySQL', 'Oracle Database', 'MongoDB', 'DBMS / RDBMS'] },
+    { label: 'Tools & office', items: ['Git', 'GitHub', 'MS Excel', 'Google Sheets', 'MS Word', 'PowerPoint'] },
+    { label: 'Emerging & academic', items: ['Artificial Intelligence (AI)', 'Machine Learning', '5G Mobile Networks', 'Network Engineering', 'Mobile Security'] } ] },
+  { title: 'Professional Skills', groups: [
+    { label: 'Communication & thinking', items: ['Communication Skill', 'Interpersonal Communication', 'Problem Solving', 'Critical Thinking', 'Technical Writing', 'Writing White Papers'] },
+    { label: 'Leadership & teamwork', items: ['Leadership', 'Team Leadership', 'People Management', 'Inspiring Leadership', 'Women’s Leadership'] },
+    { label: 'Work habits & culture', items: ['Time Management', 'Adaptability', 'Career Management', 'Workplace Culture', 'Diversity & Inclusion', 'Gender Bias Awareness Training'] } ] }
+];
+
 function Heading({ kicker, title, accent, text }) {
   return <div className="section-heading"><div><div className="kicker">{kicker}</div><h2>{title} <span className="grad">{accent}</span></h2></div>{text && <p>{text}</p>}</div>;
 }
@@ -21,8 +43,7 @@ function App() {
   const [menu, setMenu] = useState(false);
   const [view, setView] = useState('About');
   const [modal, setModal] = useState(null);
-  const [cat, setCat] = useState('All');
-  const [query, setQuery] = useState('');
+  const [skillTab, setSkillTab] = useState(0);
   const [more, setMore] = useState({ skills: false, projects: false, certs: false, metrics: false });
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState({ busy: false, text: '', error: false });
@@ -30,8 +51,7 @@ function App() {
 
   const experience = allExperience.filter(e => e.period !== 'Details to confirm');
   const allSkills = useMemo(() => Object.entries(skillGroups).flatMap(([category, items]) => items.map(([name, description]) => ({ name, description, category }))), []);
-  const filtered = allSkills.filter(s => (cat === 'All' || s.category === cat) && `${s.name} ${s.description}`.toLowerCase().includes(query.toLowerCase()));
-  const skills = more.skills || query || cat !== 'All' ? filtered : filtered.slice(0, 18);
+  const describe = n => platformDesc[n] || allSkills.find(x => x.name === n)?.description || '';
   const featured = featuredIds.map(id => projects.find(p => p.id === id)).filter(Boolean);
   const shownProjects = more.projects ? projects : featured;
   const marketCount = marketplacePlatforms.flatMap(g => g.platforms).length;
@@ -115,14 +135,9 @@ function App() {
       </section>
 
       <section className={view === 'Skills' ? 'block' : 'block off'} id="skills">
-        <Heading kicker="Skills" title="Toolkit &" accent="strengths." />
-        <div className="controls">
-          <div className="tabs">{['All', ...Object.keys(skillGroups)].map(c => <button key={c} className={cat === c ? 'active' : ''} onClick={() => setCat(c)}>{c}</button>)}</div>
-          <label className="search"><Search size={15} /><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search skills" /></label>
-        </div>
-        <div className="tags">{skills.map(s => { const I = icons[s.category] || Code2; return <button className="chip" key={s.category + s.name} onClick={() => open('skill', s)}><I size={14} />{s.name}</button>; })}</div>
-        {skills.length === 0 && <p className="muted">No skills found.</p>}
-        {!query && cat === 'All' && <button className="link" onClick={() => toggle('skills')}>{more.skills ? 'Show fewer' : `Show all ${allSkills.length} skills`} {more.skills ? <ChevronUp size={15} /> : <ChevronDown size={15} />}</button>}
+        <Heading kicker="Skills" title="Core" accent="competencies." />
+        <div className="tabs">{skillCats.map((c, i) => <button key={c.title} className={skillTab === i ? 'active' : ''} onClick={() => setSkillTab(i)}>{c.title}</button>)}</div>
+        <div className="skill-groups">{skillCats[skillTab].groups.map(g => <div className="card skill-group" key={g.label}><h3>{g.label}</h3><div className="tags">{g.items.map(n => <button className="chip" key={n} onClick={() => open('skill', { name: n, description: describe(n), category: g.label })}>{n}</button>)}</div></div>)}</div>
       </section>
 
       <section className={view === 'Projects' ? 'block' : 'block off'} id="projects">
@@ -170,7 +185,7 @@ function ModalContent({ type, item }) {
   if (type === 'experience') return <><h2>{item.role}</h2><p className="sub">{item.company} · {item.period}</p><ul>{item.details.map((d, i) => <li key={i}>{d}</li>)}</ul><Tags list={item.skills} /></>;
   if (type === 'expertise') return <><h2>{item.title}</h2><p className="sub">{item.group}</p><p className="muted">{item.description}</p><ul>{item.tasks.map((t, i) => <li key={i}>{t}</li>)}</ul></>;
   if (type === 'project') return <><h2>{item.name}</h2><p className="sub">{item.year}</p><p className="muted">{item.description}</p><Tags list={item.stack} /><div className="links">{item.links.map(l => <a key={l.label} href={l.url} target="_blank" rel="noreferrer">{l.label} <ExternalLink size={14} /></a>)}</div></>;
-  if (type === 'certification') return <><h2>{item.name}</h2><p className="sub">{item.issuer}</p><p className="muted">{item.description}</p></>;
+  if (type === 'certification') return <><h2>{item.name}</h2><p className="sub">{item.issuer}</p><p className="muted">{item.description}</p>{item.url && <div className="links"><a href={item.url} target="_blank" rel="noreferrer">View credential <ExternalLink size={14} /></a></div>}</>;
   if (type === 'education') return <><h2>{item.title}</h2><p className="sub">{item.institution} · {item.period}</p><p className="muted"><MapPin size={13} /> {item.location}</p><b className="score big">{item.score}</b><p className="muted">{item.description}</p></>;
   return null;
 }

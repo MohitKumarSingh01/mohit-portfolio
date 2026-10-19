@@ -51,3 +51,4 @@ h1,h2,h3{font-family:Manrope,sans-serif;letter-spacing:-.02em;margin:0;line-heig
 @media(max-width:560px){.grid3{grid-template-columns:1fr}.btns>*{flex:1}.search{width:100%}.modal{padding:22px}}
 
 .off{display:none!important}.nav .on{color:var(--accent);font-weight:600}.block{padding-top:48px}main{min-height:70vh}
+.skill-groups{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px;align-items:start}.skill-group h3{font-size:15px;margin-bottom:12px}@media(max-width:760px){.skill-groups{grid-template-columns:1fr}}
